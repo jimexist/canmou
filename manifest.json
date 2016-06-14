@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "生意参谋抓取",
+  "description": "生意参谋抓取",
+  "version": "1.0",
+  "browser_action": {
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://sycm.taobao.com/*",
+        "https://beta.sycm.taobao.com/*"
+      ],
+      "css": [],
+      "js": [
+        "jquery-3.0.0.min.js",
+        "lodash.js",
+        "moment.min.js",
+        "FileSaver.min.js",
+        "json2csv.js",
+        "content.js"
+      ]
+    }
+  ]
+}
