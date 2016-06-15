@@ -1,6 +1,14 @@
 var pageSize = 100;
-var codes = ['payAmt', 'payItemQty', 'payBuyerCnt', 'payPct', 'payRate'];
-var fieldNames = _.concat(['id', 'name'], codes);
+var names = {
+  'payAmt': '支付金额',
+  'payItemQty': '支付件数',
+  'payBuyerCnt': '支付买家数',
+  'payPct': '客单价',
+  'payRate': '支付转化率'
+};
+var codes = _.keys(names);
+var displayNames = _.values(names);
+var fieldNames = _.concat(['id', 'name'], displayNames);
 
 function getDateString(prompt, defaultValue) {
   var input = window.prompt(prompt, defaultValue);
@@ -34,6 +42,21 @@ function getQuery(page) {
     .join('&');
 }
 
+function transformData(data) {
+  return _.map(data, function(item) {
+    var values = _.chain(item.indexMap)
+      .toPairs()
+      .map(function(tuple) {
+        var key = names[tuple[0]];
+        var value = tuple[1];
+        return [key, value.value];
+      })
+      .fromPairs()
+      .value();
+    return _.merge({}, _.omit(item, 'indexMap'), values);
+  });
+}
+
 function pagedQuery(page, url, name) {
   var requestUrl = '/ebda/overview/' + url + '.json?' + getQuery(page);
   console.time(requestUrl);
@@ -43,12 +66,8 @@ function pagedQuery(page, url, name) {
         alert('没有获取到数据，错误信息是：\n' + JSON.stringify(resp));
         return;
       }
-      var json = _.map(resp.data.data, function(item) {
-        var values = _.chain(item.indexMap).toPairs().map(function(tuple) {
-          return [tuple[0], tuple[1].value];
-        }).fromPairs().get();
-        return _.merge({}, _.omit(item, 'indexMap'), values);
-      });
+      var json = transformData(resp.data.data);
+      console.log('json', json);
       json2csv({
         fields: fieldNames,
         data: json,
